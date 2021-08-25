@@ -1,5 +1,5 @@
 from app import app
-from flask import render_template, request, redirect
+from flask import render_template, request, redirect, jsonify, make_response
 from datetime import datetime
 
 @app.template_filter("clean_date")
@@ -101,14 +101,25 @@ users = {
 
 @app.route("/profile/<username>")
 def profile(username):
-
     user = None
-
     if username in users:
         user = users[username]
-
     return render_template("public/profile.html", username = username, user = user)
 
 @app.route("/multiple/<foo>/<bar>/<baz>")
 def multi(foo, bar, baz):
     return f"foo is {foo} bar is {bar}  baz is {baz}"
+
+@app.route("/json", methods = ["POST"])
+def json():
+    if request.is_json:
+        req = request.get_json()
+        response = {
+            "message": "JSON received",
+            "name": req["name"]
+        }
+        res = make_response(jsonify(response), 200)
+        return res
+    else:
+        res = make_response(jsonify({"message": "no JSON received"}), 400)
+        return res
